@@ -1,9 +1,9 @@
 const cacheName = "Charvey544-GD3D-0.1.6";
 const contentToCache = [
     "Build/GD3DWeb.loader.js",
-    "Build/GD3DWeb.framework.js.gz",
-    "Build/GD3DWeb.data.gz",
-    "Build/GD3DWeb.wasm.gz",
+    "Build/GD3DWeb.framework.js",
+    "Build/GD3DWeb.data",
+    "Build/GD3DWeb.wasm",
     "TemplateData/style.css"
 
 ];
