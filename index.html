@@ -4,40 +4,60 @@
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Unity WebGL Player | GD3D</title>
+
+    <!-- Cache control for GitHub Pages -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <link rel="manifest" href="manifest.webmanifest">
+
+    <!-- 🔥 VERSION + CACHE BUSTING -->
+    <script>
+      const GAME_VERSION = "0.1.7b"; // bump this every release
+
+      // Clear Cache Storage (NOT cookies)
+      if ("caches" in window) {
+        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      }
+
+      // Force one hard reload if version changed
+      const storedVersion = localStorage.getItem("gd3d_version");
+      if (storedVersion !== GAME_VERSION) {
+        localStorage.setItem("gd3d_version", GAME_VERSION);
+        location.reload(true);
+      }
+
+      // Kill old service workers (very important for GitHub Pages)
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(reg => reg.unregister());
+        });
+      }
+    </script>
   </head>
+
   <body>
     <div id="unity-container">
-      <canvas id="unity-canvas" width=1920 height=1080 tabindex="-1"></canvas>
+      <canvas id="unity-canvas" width="1920" height="1080" tabindex="-1"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
           <div id="unity-progress-bar-full"></div>
         </div>
       </div>
-      <div id="unity-warning"> </div>
+      <div id="unity-warning"></div>
     </div>
-    <script>
-      window.addEventListener("load", function () {
-        if ("serviceWorker" in navigator) {
-          navigator.serviceWorker.register("ServiceWorker.js");
-        }
-      });
 
+    <script>
       var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
       var warningBanner = document.querySelector("#unity-warning");
 
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
       function unityShowBanner(msg, type) {
         function updateBannerVisibility() {
           warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
@@ -45,10 +65,10 @@
         var div = document.createElement('div');
         div.innerHTML = msg;
         warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        if (type === 'error') div.style = 'background: red; padding: 10px;';
         else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
+          if (type === 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(() => {
             warningBanner.removeChild(div);
             updateBannerVisibility();
           }, 5000);
@@ -58,6 +78,7 @@
 
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/ea153e321edf23b9a40b38d65ce41d01.loader.js";
+
       var config = {
         dataUrl: buildUrl + "/755e83aa5f056c67858ab725c75fc830.data",
         frameworkUrl: buildUrl + "/65767f866c90c54e0ae5bfefa6de01a5.framework.js",
@@ -65,23 +86,15 @@
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Charvey544",
         productName: "GD3D",
-        productVersion: "0.1.7b",
+        productVersion: GAME_VERSION,
         showBanner: unityShowBanner,
       };
 
-      // By default Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
         var meta = document.createElement('meta');
         meta.name = 'viewport';
         meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
+        document.head.appendChild(meta);
       }
 
       loadingBar.style.display = "block";
@@ -90,13 +103,14 @@
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
-          progressBarFull.style.width = 100 * progress + "%";
-        }).then((unityInstance) => {
+          progressBarFull.style.width = (100 * progress) + "%";
+        }).then(() => {
           loadingBar.style.display = "none";
         }).catch((message) => {
           alert(message);
         });
       };
+
       document.body.appendChild(script);
     </script>
   </body>
